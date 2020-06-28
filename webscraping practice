@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jun 26 15:16:46 2020
+
+@author: roryp
+"""
+import requests
+from bs4 import BeautifulSoup
+url = 'http://quotes.toscrape.com/'
+
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'lxml')
+quotes = soup.find_all('span', class_='text')
+authors = soup.find_all('small', class_='author')
+tags = soup.find_all('div', class_='tags')
+for i in range(0,len(quotes)):
+    print(quotes[i].text)
+    print(authors[i].text)
+    quoteTags = tags[i].find_all('a', class_='tag')
+    for quoteTag in quoteTags:
+        print(quoteTag.text)
+#%%
+url = 'https://scrapingclub.com/exercise/list_basic/?page=1'
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'lxml')
+items = soup.find_all('div', class_='col-lg-4 col-md-6 mb-4')
+count = 1
+for i in items:
+    itemName = i.find('h4', class_='card-title').text.strip('\n')
+    itemPrice = i.find('h5').text
+    print('%s ) Price: %s, Item Name: %s' % (count, itemPrice, itemName))
+    count = count + 1
+    
+pages = soup.find('ul', class_='pagination')
+urls = []
+links = pages.find_all('a', class_='page-link')
+for link in links:
+    pageNum = int(link.text) if link.text.isdigit() else None
+    if pageNum != None:
+        x = link.get('href')
+        urls.append(x)
+print(urls)
+count = 1   
+for i in urls:
+    newUrl = url + i
+    response = requests.get(newUrl)
+    soup = BeautifulSoup(response.text, 'lxml')
+    items = soup.find_all('div', class_='col-lg-4 col-md-6 mb-4')
+    for i in items:
+        itemName = i.find('h4', class_='card-title').text.strip('\n')
+        itemPrice = i.find('h5').text
+        print('%s ) Price: %s, Item Name: %s' % (count, itemPrice, itemName))
+        count = count + 1
+        
+#%%
+from selenium import webdriver 
+driver = webdriver.Chrome('C:/Users/roryp/Downloads/chromedriver_win32/chromedriver.exe')
+driver.get('https://www.seleniumeasy.com/test/basic-first-form-demo.html')
+
+messageField = driver.find_element_by_xpath('//*[@id="user-message"]')
+messageField.send_keys('Hello World')
+showMessButton = driver.find_element_by_xpath('//*[@id="get-input"]/button')
+showMessButton.click()
+#%%
+from selenium.webdriver.common.action_chains import ActionChains
+driver = webdriver.Chrome('C:/Users/roryp/Downloads/chromedriver_win32/chromedriver.exe')
+driver.maximize_window()
+driver.get('http://www.dhtmlgoodies.com/scripts/drag-drop-custom/demo-drag-drop-3.html')
+source = driver.find_element_by_xpath('//*[@id="box3"]')
+dest = driver.find_element_by_xpath('//*[@id="box103"]')
+
+actions = ActionChains(driver)
+actions.drag_and_drop(source, dest).perform()
+#%%
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+url = 'https://www.google.co.uk/intl/en_uk/earth/'
+driver = webdriver.Chrome('C:/Users/roryp/Downloads/chromedriver_win32/chromedriver.exe')
+driver.get(url)
+wait = WebDriverWait(driver, 5)
+launchEarthButton = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/header/div/nav[1]/ul[2]/li[2]/a/span/span')))
+launchEarthButton.click()
